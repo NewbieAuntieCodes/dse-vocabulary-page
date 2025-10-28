@@ -17,6 +17,7 @@ export const workWordList: WordList = {
   description: '讨论不同职业、工作环境和职业发展的词汇。',
   illustration: WorkTopicIllustration,
   theme: 'learn',
+  category: 'dse',
   words: [
     { 
       word: 'firefighter', 

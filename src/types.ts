@@ -1,8 +1,9 @@
 
+
 // Import React to provide the React namespace for types like React.FC.
 import React from 'react';
 
-export type Page = 'home' | 'learn' | 'practice' | 'games' | 'my-words';
+export type Page = 'home' | 'learn' | 'my-words';
 
 export interface Word {
   word: string;
@@ -18,5 +19,6 @@ export interface WordList {
   description: string;
   words: Word[];
   illustration: React.FC;
-  theme: 'learn' | 'practice' | 'games';
+  theme: 'learn' | 'skills';
+  category: string;
 }

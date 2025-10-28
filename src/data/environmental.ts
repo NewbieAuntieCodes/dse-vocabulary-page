@@ -12,6 +12,7 @@ export const environmentalWordList: WordList = {
   description: '探讨环境保护、污染和可持续发展。',
   illustration: EnvironmentalTopicIllustration,
   theme: 'learn',
+  category: 'dse',
   words: [
     { word: 'recycle', phonetic: '/ˌriːˈsaɪkl/', definition: '回收利用', example: 'We should recycle paper, plastic, and glass to protect the environment.', illustration: () => React.createElement(WordIllustrationCard, { text: "回收", colors: ['#27AE60', '#2ECC71'], icon: React.createElement(RecycleIcon) }) },
     { word: 'pollution', phonetic: '/pəˈluːʃn/', definition: '污染', example: 'Air pollution is a major problem in many industrial cities.', illustration: () => React.createElement(WordIllustrationCard, { text: "污染", colors: ['#7F8C8D', '#95A5A6'], icon: React.createElement(PollutionIcon) }) },

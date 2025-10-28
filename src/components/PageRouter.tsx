@@ -1,8 +1,6 @@
 import React from 'react';
 import HomePage from '../pages/HomePage';
 import LearnPage from '../pages/LearnPage';
-import PracticePage from '../pages/PracticePage';
-import GamesPage from '../pages/GamesPage';
 import MyWordsPage from '../pages/MyWordsPage';
 import { Page } from '../types';
 
@@ -31,13 +29,6 @@ const PageRouter: React.FC<PageRouterProps> = ({
                         topicId={activeTopicId!} 
                         navigateTo={navigateTo} 
                     />;
-        case 'practice':
-            return <PracticePage
-                        topicId={activeTopicId!}
-                        navigateTo={navigateTo}
-                    />;
-        case 'games':
-            return <GamesPage navigateTo={navigateTo} />;
         case 'my-words':
             return <MyWordsPage 
                         navigateTo={navigateTo} 

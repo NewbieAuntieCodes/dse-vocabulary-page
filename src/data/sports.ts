@@ -3,7 +3,8 @@ import { WordList } from '../types';
 import {
     SportsTopicIllustration,
     WordIllustrationCard, StretchIcon, KickIcon, ScoreIcon, CatchIcon, CrawlIcon, HitIcon,
-    OpponentIcon, RefereeIcon, TournamentIcon, MuscleIcon, DopamineIcon, EndorphinIcon, ReleaseStressIcon
+    OpponentIcon, RefereeIcon, TournamentIcon, MuscleIcon, DopamineIcon, EndorphinIcon, ReleaseStressIcon,
+    HelmetIcon, RegularIcon, RoutineIcon, SelfDisciplineIcon
 } from '../components/Illustrations';
 
 export const sportsWordList: WordList = {
@@ -12,6 +13,7 @@ export const sportsWordList: WordList = {
   description: '讨论各类体育活动和竞赛的常用词汇。',
   illustration: SportsTopicIllustration,
   theme: 'learn',
+  category: 'dse',
   words: [
     { word: 'stretch', phonetic: '/stretʃ/', definition: '伸展，舒展', example: 'It\'s important to stretch before you exercise.', illustration: () => React.createElement(WordIllustrationCard, { text: "伸展", colors: ['#48C9B0', '#1ABC9C'], icon: React.createElement(StretchIcon) }) },
     { word: 'kick', phonetic: '/kɪk/', definition: '踢', example: 'He can kick the ball really hard.', illustration: () => React.createElement(WordIllustrationCard, { text: "踢", colors: ['#58D68D', '#2ECC71'], icon: React.createElement(KickIcon) }) },
@@ -25,6 +27,34 @@ export const sportsWordList: WordList = {
     { word: 'muscle', phonetic: '/ˈmʌsl/', definition: '肌肉', example: 'Lifting weights helps to build muscle.', illustration: () => React.createElement(WordIllustrationCard, { text: "肌肉", colors: ['#F1948A', '#D98880'], icon: React.createElement(MuscleIcon) }) },
     { word: 'dopamine', phonetic: '/ˈdoʊpəmiːn/', definition: '多巴胺', example: 'Exercise can increase the levels of dopamine in your brain.', illustration: () => React.createElement(WordIllustrationCard, { text: "多巴胺", colors: ['#5dade2', '#3498db'], icon: React.createElement(DopamineIcon) }) },
     { word: 'endorphin', phonetic: '/enˈdɔːrfɪn/', definition: '内啡肽', example: 'Running releases endorphins, which can make you feel happy.', illustration: () => React.createElement(WordIllustrationCard, { text: "内啡肽", colors: ['#48c9b0', '#1abc9c'], icon: React.createElement(EndorphinIcon) }) },
-    { word: 'release', phonetic: '/rɪˈliːs/', definition: '释放', example: 'Physical activity is a good way to release stress.', illustration: () => React.createElement(WordIllustrationCard, { text: "释放", colors: ['#a569bd', '#8e44ad'], icon: React.createElement(ReleaseStressIcon) }) }
+    { word: 'release', phonetic: '/rɪˈliːs/', definition: '释放', example: 'Physical activity is a good way to release stress.', illustration: () => React.createElement(WordIllustrationCard, { text: "释放", colors: ['#a569bd', '#8e44ad'], icon: React.createElement(ReleaseStressIcon) }) },
+    { 
+      word: 'helmet', 
+      phonetic: '/ˈhelmɪt/', 
+      definition: '头盔', 
+      example: 'It\'s important to wear a helmet when you ride a bike.', 
+      illustration: () => React.createElement(WordIllustrationCard, { text: "头盔", colors: ['#7F8C8D', '#95A5A6'], icon: React.createElement(HelmetIcon) }) 
+    },
+    { 
+      word: 'regular', 
+      phonetic: '/ˈreɡjələr/', 
+      definition: '定期的；有规律的', 
+      example: 'Regular exercise is good for your health.', 
+      illustration: () => React.createElement(WordIllustrationCard, { text: "定期的", colors: ['#5dade2', '#3498db'], icon: React.createElement(RegularIcon) }) 
+    },
+    { 
+      word: 'routine', 
+      phonetic: '/ruːˈtiːn/', 
+      definition: '常规；例行公事', 
+      example: 'My morning routine includes jogging and a healthy breakfast.', 
+      illustration: () => React.createElement(WordIllustrationCard, { text: "常规", colors: ['#1abc9c', '#16a085'], icon: React.createElement(RoutineIcon) }) 
+    },
+    { 
+      word: 'self-discipline', 
+      phonetic: '/ˌselfˈdɪsəplɪn/', 
+      definition: '自律', 
+      example: 'Becoming a professional athlete requires a lot of self-discipline.', 
+      illustration: () => React.createElement(WordIllustrationCard, { text: "自律", colors: ['#9b59b6', '#8e44ad'], icon: React.createElement(SelfDisciplineIcon) }) 
+    }
   ],
 };

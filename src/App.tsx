@@ -38,7 +38,7 @@ const App: React.FC = () => {
     const navigateTo = (targetPage: Page) => {
         window.scrollTo(0, 0); // Scroll to top on page change
         setPage(targetPage);
-         if (targetPage !== 'learn' && targetPage !== 'practice') {
+         if (targetPage !== 'learn') {
             setActiveTopicId(null);
         }
     };

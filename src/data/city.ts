@@ -13,6 +13,7 @@ export const cityWordList: WordList = {
   description: '关于城市设施、交通和生活的词汇。',
   illustration: CityTopicIllustration,
   theme: 'learn',
+  category: 'dse',
   words: [
     { word: 'skyscraper', phonetic: '/ˈskaɪskreɪpər/', definition: '摩天大楼', example: 'Hong Kong is famous for its skyline filled with skyscrapers.', illustration: () => React.createElement(WordIllustrationCard, { text: "摩天大楼", colors: ['#5D6D7E', '#34495E'], icon: React.createElement(BuildingIcon) }) },
     { word: 'metropolis', phonetic: '/məˈtrɑːpəlɪs/', definition: '大都市', example: 'Tokyo is a bustling metropolis with millions of residents.', illustration: () => React.createElement(WordIllustrationCard, { text: "大都市", colors: ['#AF7AC5', '#8E44AD'], icon: React.createElement(MetroIcon) }) },

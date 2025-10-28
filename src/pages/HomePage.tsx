@@ -1,7 +1,7 @@
 import React from 'react';
 import { styled } from 'styled-components';
 import { wordLists } from '../vocabulary';
-import { Page } from '../types';
+import { Page, WordList as WordListType } from '../types';
 
 const HeroIllustration = () => (
     <svg width="450" height="300" viewBox="0 0 450 300" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -26,6 +26,25 @@ interface HomePageProps {
 }
 
 const HomePage: React.FC<HomePageProps> = ({ navigateToActivity }) => {
+    const dseLists = wordLists.filter(list => list.category === 'dse');
+    const skillsLists = wordLists.filter(list => list.category === 'skills');
+
+    const renderTopicGrid = (lists: WordListType[]) => (
+        <TopicsGrid>
+            {lists.map(list => (
+                <TopicCard key={list.id} onClick={() => navigateToActivity(list.id, 'learn')} $theme={list.theme}>
+                    <IllustrationContainer>
+                        {list.illustration && <list.illustration />}
+                    </IllustrationContainer>
+                    <CardContent>
+                        <h2>{list.title}</h2>
+                        <p>{list.description}</p>
+                    </CardContent>
+                </TopicCard>
+            ))}
+        </TopicsGrid>
+    );
+
     return (
         <HomeContainer>
             <HeroSection>
@@ -37,19 +56,16 @@ const HomePage: React.FC<HomePageProps> = ({ navigateToActivity }) => {
                     <HeroIllustration />
                 </HeroIllustrationWrapper>
             </HeroSection>
-            <TopicsGrid>
-                {wordLists.map(list => (
-                    <TopicCard key={list.id} onClick={() => navigateToActivity(list.id, list.theme as Page)} $theme={list.theme}>
-                        <IllustrationContainer>
-                            {list.illustration && <list.illustration />}
-                        </IllustrationContainer>
-                        <CardContent>
-                            <h2>{list.title}</h2>
-                            <p>{list.description}</p>
-                        </CardContent>
-                    </TopicCard>
-                ))}
-            </TopicsGrid>
+            
+            {renderTopicGrid(dseLists)}
+
+            {skillsLists.length > 0 && (
+                <SkillsSection>
+                    <SectionHeader>Essential Skills</SectionHeader>
+                    {renderTopicGrid(skillsLists)}
+                </SkillsSection>
+            )}
+
         </HomeContainer>
     );
 };
@@ -113,6 +129,28 @@ const HeroIllustrationWrapper = styled.div`
     }
 `;
 
+const SkillsSection = styled.section`
+    margin-top: 5rem;
+    animation: fadeIn 0.5s ease;
+`;
+
+const SectionHeader = styled.h2`
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.header};
+    margin-bottom: 2rem;
+    text-align: left;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+
+    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+        font-size: 2rem;
+        text-align: center;
+        border-bottom: none;
+    }
+`;
+
+
 const TopicsGrid = styled.main`
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -134,11 +172,10 @@ const CardContent = styled.div`
     text-align: left;
 `;
 
-const TopicCard = styled.div<{ $theme: 'learn' | 'practice' | 'games' }>`
+const TopicCard = styled.div<{ $theme: 'learn' | 'skills' }>`
     background-color: ${({ theme, $theme }) => ({
         'learn': theme.colors.learnLight,
-        'practice': theme.colors.practiceLight,
-        'games': theme.colors.gamesLight
+        'skills': theme.colors.skillsLight
     })[$theme] || theme.colors.cardBg};
     border-radius: 24px;
     padding: 1.5rem;
