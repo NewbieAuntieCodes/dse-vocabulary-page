@@ -13,12 +13,49 @@ const speak = (text: string) => {
     }
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    const voices = window.speechSynthesis.getVoices();
-    let selectedVoice = voices.find(v => v.lang.startsWith('en-US') && v.name.includes('Google')) || voices.find(v => v.lang.startsWith('en-GB')) || voices.find(v => v.lang.startsWith('en-US'));
-    utterance.voice = selectedVoice || null;
-    utterance.lang = 'en-US';
-    utterance.rate = 0.9;
-    window.speechSynthesis.speak(utterance);
+
+    const setVoiceAndSpeak = () => {
+        const voices = window.speechSynthesis.getVoices();
+        if (voices.length === 0) {
+            // Voices not loaded yet. The event listener will trigger this function again.
+            return;
+        }
+
+        let selectedVoice = 
+            // 1. High-quality voices by name, prioritizing female voices which are often perceived as clearer.
+            voices.find(v => v.name === 'Samantha' && v.lang.startsWith('en-')) || // Apple (high quality)
+            voices.find(v => v.name === 'Google US English') || // Google (high quality)
+            voices.find(v => v.name.includes('Zira') && v.lang.startsWith('en-')) || // Microsoft (high quality)
+            voices.find(v => v.name === 'Daniel' && v.lang.startsWith('en-')) || // Apple UK (high quality)
+            
+            // 2. Fallback to high-quality local (on-device) voices
+            voices.find(v => v.lang === 'en-US' && v.localService) ||
+            voices.find(v => v.lang === 'en-GB' && v.localService) ||
+            
+            // 3. Generic fallbacks for US/GB English
+            voices.find(v => v.lang === 'en-US') ||
+            voices.find(v => v.lang === 'en-GB') ||
+
+            // 4. Any English voice
+            voices.find(v => v.lang.startsWith('en-'));
+            
+        utterance.voice = selectedVoice || null;
+        utterance.lang = selectedVoice ? selectedVoice.lang : 'en-US';
+        utterance.rate = 0.9;
+        utterance.pitch = 1; // A pitch of 1 is generally the most natural.
+
+        // It's good practice to remove the listener after use.
+        window.speechSynthesis.onvoiceschanged = null;
+
+        window.speechSynthesis.speak(utterance);
+    }
+
+    // Voices can load asynchronously. We need to handle both cases.
+    if (window.speechSynthesis.getVoices().length === 0) {
+        window.speechSynthesis.onvoiceschanged = setVoiceAndSpeak;
+    } else {
+        setVoiceAndSpeak();
+    }
 };
 
 

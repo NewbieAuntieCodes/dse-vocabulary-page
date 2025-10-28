@@ -50,6 +50,38 @@ export const skillsUnit1: WordList = {
       definition: '从我的角度来看',
       example: 'From my perspective, the problem is more complex than it seems.',
       illustration: () => React.createElement(WordIllustrationCard, { text: "我的角度", colors: ['#AF7AC5', '#9B59B6'], icon: React.createElement(PerspectiveIcon) })
+    }
+  ],
+};
+
+export const skillsUnit2: WordList = {
+  id: 'skills-unit-2',
+  title: 'Unit 2: 讨论生活与观点',
+  description: '学习如何讨论个人生活、健康以及表达赞同或反对的观点。',
+  illustration: SkillsTopicIllustration,
+  theme: 'skills',
+  category: 'skills',
+  words: [
+    {
+      word: 'I agree',
+      phonetic: '/aɪ əˈɡriː/',
+      definition: '我同意',
+      example: 'I agree with you on that point.',
+      illustration: () => React.createElement(WordIllustrationCard, { text: "我同意", colors: ['#58D68D', '#2ECC71'], icon: React.createElement(AgreeIcon) })
+    },
+    {
+      word: 'I disagree',
+      phonetic: '/aɪ ˌdɪsəˈɡriː/',
+      definition: '我不同意',
+      example: 'I disagree with the decision to close the library.',
+      illustration: () => React.createElement(WordIllustrationCard, { text: "我不同意", colors: ['#EC7063', '#E74C3C'], icon: React.createElement(DisagreeIcon) })
+    },
+    {
+      word: 'That\'s a good point',
+      phonetic: '/ðæts ə ɡʊd pɔɪnt/',
+      definition: '说得好',
+      example: 'That\'s a good point, I hadn\'t thought about it that way.',
+      illustration: () => React.createElement(WordIllustrationCard, { text: "说得好", colors: ['#F39C12', '#E67E22'], icon: React.createElement(AgreeIcon) })
     },
     {
       word: 'available',
@@ -121,38 +153,6 @@ export const skillsUnit1: WordList = {
       example: 'I\'m feeling a lot of stress from my exams.',
       illustration: () => React.createElement(WordIllustrationCard, { text: "紧张", colors: ['#7F8C8D', '#5D6D7E'], icon: React.createElement(WeightIcon) })
     }
-  ],
-};
-
-export const skillsUnit2: WordList = {
-  id: 'skills-unit-2',
-  title: 'Unit 2: 同意与反对',
-  description: '学习如何表达赞同、提出异议以及进行礼貌的辩论。',
-  illustration: SkillsTopicIllustration,
-  theme: 'skills',
-  category: 'skills',
-  words: [
-    {
-      word: 'I agree',
-      phonetic: '/aɪ əˈɡriː/',
-      definition: '我同意',
-      example: 'I agree with you on that point.',
-      illustration: () => React.createElement(WordIllustrationCard, { text: "我同意", colors: ['#58D68D', '#2ECC71'], icon: React.createElement(AgreeIcon) })
-    },
-    {
-      word: 'I disagree',
-      phonetic: '/aɪ ˌdɪsəˈɡriː/',
-      definition: '我不同意',
-      example: 'I disagree with the decision to close the library.',
-      illustration: () => React.createElement(WordIllustrationCard, { text: "我不同意", colors: ['#EC7063', '#E74C3C'], icon: React.createElement(DisagreeIcon) })
-    },
-    {
-      word: 'That\'s a good point',
-      phonetic: '/ðæts ə ɡʊd pɔɪnt/',
-      definition: '说得好',
-      example: 'That\'s a good point, I hadn\'t thought about it that way.',
-      illustration: () => React.createElement(WordIllustrationCard, { text: "说得好", colors: ['#F39C12', '#E67E22'], icon: React.createElement(AgreeIcon) })
-    },
   ],
 };
 

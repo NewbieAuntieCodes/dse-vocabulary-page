@@ -25,6 +25,11 @@ export const theme = {
         skills: '#F52F70', // Pink/Magenta
         skillsLight: '#FFF0F5',
         myWords: '#6D55FF', // Indigo
+        // FIX: Add missing colors for games and practice pages.
+        games: '#7950F2', // Purple for Games
+        gamesLight: '#F2F0FF',
+        practice: '#3498db', // Blue for Practice
+        practiceLight: '#EAF4FC',
 
         // Status colors
         primaryRed: '#e74c3c',
