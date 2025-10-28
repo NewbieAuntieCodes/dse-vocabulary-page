@@ -264,6 +264,7 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
     const topic = wordLists.find(list => list.id === topicId);
     const [step, setStep] = useState<Step>('selection');
     const [selectedWords, setSelectedWords] = useState<Word[]>([]);
+    const [copyStatus, setCopyStatus] = useState(''); // State for copy feedback
 
     useEffect(() => {
         if (topic) setSelectedWords(topic.words);
@@ -276,6 +277,26 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
     };
 
     const handleSelectAll = (select: boolean) => setSelectedWords(select ? topic.words : []);
+
+    // Function to handle copying selected words
+    const handleCopySelectedWords = () => {
+        if (selectedWords.length === 0) return;
+
+        const textToCopy = selectedWords
+            .map(word => `${word.word}   ${word.phonetic}   ${word.definition}\n"${word.example}"`)
+            .join('\n\n');
+
+        navigator.clipboard.writeText(textToCopy).then(
+            () => {
+                setCopyStatus('已复制！');
+                setTimeout(() => setCopyStatus(''), 2000);
+            },
+            () => {
+                setCopyStatus('复制失败');
+                setTimeout(() => setCopyStatus(''), 2000);
+            }
+        );
+    };
     
     const topicForLearning = { ...topic, words: selectedWords };
 
@@ -309,6 +330,10 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
                         <SelectionActions>
                             <ActionButton onClick={() => handleSelectAll(true)}>全选</ActionButton>
                             <ActionButton onClick={() => handleSelectAll(false)}>全不选</ActionButton>
+                            <ActionButton onClick={handleCopySelectedWords} disabled={selectedWords.length === 0}>
+                                复制已选 ({selectedWords.length})
+                            </ActionButton>
+                            {copyStatus && <CopyStatus>{copyStatus}</CopyStatus>}
                         </SelectionActions>
                         <WordListContainer>
                             {topic.words.map(word => (
@@ -380,65 +405,123 @@ const BackButton = styled.button`
     &:hover { background-color: ${({ theme }) => theme.colors.boxBg}; color: ${({ theme }) => theme.colors.primary}; transform: translateY(-50%) scale(1.05); box-shadow: ${({ theme }) => theme.shadows.main}; }
 `;
 
-// --- Learn Step Styles ---
-const StepContainer = styled.div`animation: ${fadeIn} 0.5s ease; display: flex; flex-direction: column; align-items: center;`;
-const Flashcard = styled.div`background-color: ${({ theme }) => theme.colors.cardBg}; border-radius: 24px; box-shadow: ${({ theme }) => theme.shadows.main}; border: 1px solid ${({ theme }) => theme.colors.border}; width: 100%; max-width: 380px; overflow: hidden; display: flex; flex-direction: column;`;
-const IllustrationContainer = styled.div`background-color: #e6f8f2; height: 200px; display: flex; align-items: center; justify-content: center; svg { max-width: 100%; max-height: 100%; }`;
-const WordDetails = styled.div`padding: 1.75rem; text-align: center;`;
-const WordRow = styled.div`display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.25rem;`;
-const SpeakButton = styled.button`
-    background: transparent; border: none; cursor: pointer; color: ${({ theme }) => theme.colors.label}; padding: 0.5rem; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s, color 0.2s;
-    &:hover { background-color: ${({ theme }) => theme.colors.boxBg}; color: ${({ theme }) => theme.colors.primary}; }
-    svg { width: 28px; height: 28px; }
+const StepContainer = styled.div`
+    animation: ${popIn} 0.3s ease-out;
 `;
-const WordText = styled.h2`font-size: 2.75rem; font-weight: 700; color: ${({ theme }) => theme.colors.header}; margin: 0;`;
-const PhoneticText = styled.p`font-size: 1.1rem; color: ${({ theme }) => theme.colors.label}; margin: 0 0 1.5rem 0;`;
-const DefinitionText = styled.p`font-size: 1.25rem; font-weight: 500; color: ${({ theme }) => theme.colors.text}; margin: 0 0 1rem 0;`;
-const ExampleText = styled.p`font-size: 1rem; color: ${({ theme }) => theme.colors.label}; font-style: italic; margin: 0;`;
-const FlashcardNav = styled.div`display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 500px; margin-top: 1.5rem;`;
-const NavButton = styled.button`
-    background-color: ${({ theme }) => theme.colors.cardBg}; border: 1px solid ${({ theme }) => theme.colors.border}; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; color: ${({ theme }) => theme.colors.header}; cursor: pointer; transition: all 0.2s ease;
-    &:hover:not(:disabled) { background-color: ${({ theme }) => theme.colors.boxBg}; transform: scale(1.05); }
-    &:disabled { color: ${({ theme }) => theme.colors.label}; cursor: not-allowed; opacity: 0.6; }
-`;
-const ProgressText = styled.div`font-size: 1.1rem; font-weight: 600; color: ${({ theme }) => theme.colors.label}; width: 80px; text-align: center;`;
 
-// --- Word Selection Styles ---
-const SelectionContainer = styled.div`background-color: ${({ theme }) => theme.colors.cardBg}; border-radius: 24px; padding: 2rem; box-shadow: ${({ theme }) => theme.shadows.main}; border: 1px solid ${({ theme }) => theme.colors.border}; display: flex; flex-direction: column;`;
-const SelectionActions = styled.div`display: flex; gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid ${({ theme }) => theme.colors.border};`;
-const ActionButton = styled.button`font-family: inherit; font-size: 0.9rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; border: 1px solid ${({ theme }) => theme.colors.border}; background-color: ${({ theme }) => theme.colors.cardBg}; color: ${({ theme }) => theme.colors.header}; &:hover { background-color: ${({ theme }) => theme.colors.boxBg}; border-color: ${({ theme }) => theme.colors.primary}; }`;
-const WordListContainer = styled.div`display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 0.75rem; max-height: 55vh; overflow-y: auto; padding: 0.5rem; margin-bottom: 1.5rem;`;
+const Flashcard = styled.div`
+    background-color: ${({ theme }) => theme.colors.cardBg}; border-radius: 24px; box-shadow: ${({ theme }) => theme.shadows.main}; border: 1px solid ${({ theme }) => theme.colors.border};
+    width: 100%; max-width: 500px; margin: 0 auto; padding: 2.5rem; display: flex; flex-direction: column; align-items: center;
+    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) { padding: 1.5rem; }
+`;
+
+const IllustrationContainer = styled.div`
+    width: 140px; height: 140px; margin-bottom: 2rem;
+    & > div { width: 100%; height: 100%; } // Ensure WordIllustrationCard fills container
+`;
+
+const WordDetails = styled.div`text-align: center; width: 100%;`;
+const WordRow = styled.div`display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem;`;
+const WordText = styled.h2`font-size: 2.5rem; color: ${({ theme }) => theme.colors.header}; font-weight: 700; margin: 0;`;
+const SpeakButton = styled.button`
+    background: none; border: none; cursor: pointer; color: ${({ theme }) => theme.colors.label}; padding: 0.5rem; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    &:hover { color: ${({ theme }) => theme.colors.primary}; background-color: ${({ theme }) => theme.colors.boxBg}; }
+`;
+const PhoneticText = styled.p`font-size: 1.25rem; color: ${({ theme }) => theme.colors.label}; margin: 0 0 1rem 0;`;
+const DefinitionText = styled.p`font-size: 1.5rem; color: ${({ theme }) => theme.colors.text}; font-weight: 500; margin: 0 0 1.5rem 0;`;
+const ExampleText = styled.p`font-size: 1.1rem; color: ${({ theme }) => theme.colors.label}; margin: 0; font-style: italic;`;
+
+const FlashcardNav = styled.div`
+    display: flex; justify-content: space-between; align-items: center; max-width: 500px; margin: 1.5rem auto 0;
+`;
+const NavButton = styled.button`
+    background-color: ${({ theme }) => theme.colors.cardBg}; border: 1px solid ${({ theme }) => theme.colors.border}; border-radius: 50%; width: 50px; height: 50px;
+    display: flex; align-items: center; justify-content: center; color: ${({ theme }) => theme.colors.text}; cursor: pointer; transition: all 0.2s ease;
+    &:hover:not(:disabled) { background-color: ${({ theme }) => theme.colors.boxBg}; color: ${({ theme }) => theme.colors.primary}; }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+`;
+const ProgressText = styled.span`font-weight: 500; color: ${({ theme }) => theme.colors.label};`;
+const CompleteButton = styled.button<{ $themeColor: string }>`
+    font-family: inherit; font-size: 1rem; font-weight: 600; padding: 0.8rem 2rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; border: none;
+    background-color: ${({ theme, $themeColor }) => theme.colors[$themeColor]}; color: white; box-shadow: 0 4px 10px ${({ theme, $themeColor }) => `${theme.colors[$themeColor]}50`};
+    &:hover { transform: scale(1.05); }
+`;
+
+// Selection Step Styles
+const SelectionContainer = styled.div`
+    background-color: ${({ theme }) => theme.colors.cardBg}; border-radius: 24px; box-shadow: ${({ theme }) => theme.shadows.main}; border: 1px solid ${({ theme }) => theme.colors.border};
+    padding: 2rem; animation: ${popIn} 0.3s ease-out;
+`;
+
+const SelectionActions = styled.div`
+    display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const ActionButton = styled.button`
+    font-family: inherit; font-size: 0.9rem; font-weight: 600; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;
+    border: 1px solid ${({ theme }) => theme.colors.border}; background-color: ${({ theme }) => theme.colors.boxBg}; color: ${({ theme }) => theme.colors.header};
+    &:hover:not(:disabled) { background-color: ${({ theme }) => theme.colors.border}; }
+    &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+`;
+
+const CopyStatus = styled.span`
+    font-size: 0.9rem;
+    color: ${({ theme }) => theme.colors.learn};
+    font-weight: 500;
+    margin-left: 1rem;
+`;
+
+const WordListContainer = styled.div`
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 2.5rem;
+`;
+
 const WordItem = styled.div`
-    label { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem; border-radius: 12px; cursor: pointer; transition: background-color 0.2s; border: 1px solid transparent; font-size: 0.95rem; &:hover { background-color: ${({ theme }) => theme.colors.boxBg}; } }
-    input[type="checkbox"] { appearance: none; -webkit-appearance: none; width: 20px; height: 20px; border: 2px solid ${({ theme }) => theme.colors.border}; border-radius: 6px; cursor: pointer; position: relative; transition: all 0.2s; flex-shrink: 0;
-        &:checked { background-color: ${({ theme }) => theme.colors.learn}; border-color: ${({ theme }) => theme.colors.learn}; }
-        &:checked::after { content: '✔'; position: absolute; color: white; font-size: 14px; top: 50%; left: 50%; transform: translate(-50%, -50%); } }
-    strong { color: ${({ theme }) => theme.colors.header}; }
+    label { display: flex; align-items: center; gap: 0.75rem; cursor: pointer; padding: 0.5rem; border-radius: 8px; transition: background-color 0.2s; }
+    label:hover { background-color: ${({ theme }) => theme.colors.boxBg}; }
+    input[type="checkbox"] { width: 20px; height: 20px; cursor: pointer; accent-color: ${({ theme }) => theme.colors.learn}; }
+    strong { font-weight: 600; color: ${({ theme }) => theme.colors.header}; }
     span { color: ${({ theme }) => theme.colors.label}; }
 `;
 
-// --- Practice Game Styles ---
+const StartButton = styled(CompleteButton)`
+    display: block; margin: 0 auto;
+    &:disabled {
+        background-color: #bdc3c7;
+        cursor: not-allowed;
+        box-shadow: none;
+        transform: none;
+    }
+`;
+
+// Practice Game Styles
 const GameCard = styled.div`
     background-color: ${({ theme }) => theme.colors.cardBg}; border-radius: 24px; box-shadow: ${({ theme }) => theme.shadows.main}; border: 1px solid ${({ theme }) => theme.colors.border};
     width: 100%; max-width: 700px; margin: 0 auto; padding: 2.5rem; display: flex; flex-direction: column; align-items: center; position: relative; overflow: hidden; min-height: 450px;
+    animation: ${popIn} 0.3s ease-out;
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) { padding: 1.5rem; min-height: 400px; }
 `;
+
 const ProgressBarContainer = styled.div`position: absolute; top: 0; left: 0; width: 100%; height: 8px; background-color: ${({ theme }) => theme.colors.boxBg};`;
 const ProgressBar = styled.div`height: 100%; background-color: ${({ theme }) => theme.colors.learn}; transition: width 0.3s ease;`;
 const PromptContainer = styled.div`width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;`;
 const ListenPromptContainer = styled(PromptContainer)``;
 const PracticePromptText = styled.h2`font-size: 2.5rem; color: ${({ theme }) => theme.colors.header}; font-weight: 700; text-align: center;`;
+
 const ListenButton = styled.button`
-    background-color: ${({ theme }) => theme.colors.primaryLight}; border: none; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
-    color: ${({ theme }) => theme.colors.primary}; transition: all 0.2s ease;
-    &:hover { transform: scale(1.1); background-color: #E2DFFF; }
+    background-color: ${({ theme }) => theme.colors.learnLight}; border: none; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    color: ${({ theme }) => theme.colors.learn}; transition: all 0.2s ease;
+    &:hover { transform: scale(1.1); background-color: #D6F2EB; }
 `;
-const OptionsGrid = styled.div<{$isChinese?: boolean}>`
+
+const OptionsGrid = styled.div<{ $isChinese?: boolean }>`
     display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; width: 100%; max-width: 500px;
-    button {
-        font-size: ${({ $isChinese }) => $isChinese ? '1.1rem' : '1.25rem'};
-    }
+    button { font-size: ${({ $isChinese }) => $isChinese ? '1.1rem' : '1.25rem'}; }
 `;
+
 const OptionButton = styled.button<{ $state: 'default' | 'correct' | 'incorrect' | 'disabled' }>`
     font-family: inherit; font-weight: 600; padding: 1.25rem; border-radius: 16px; cursor: pointer; transition: all 0.2s ease;
     border: 2px solid ${({ theme }) => theme.colors.border}; background-color: ${({ theme }) => theme.colors.cardBg}; color: ${({ theme }) => theme.colors.header};
@@ -453,29 +536,19 @@ const OptionButton = styled.button<{ $state: 'default' | 'correct' | 'incorrect'
     }}
 `;
 
-// --- Shared & Results Buttons ---
-const CompleteButton = styled.button<{ $themeColor?: 'learn' | 'games' }>`
-    font-family: inherit; font-size: 1rem; font-weight: 600; padding: 0.8rem 2rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; border: none;
-    background-color: ${({ theme, $themeColor = 'learn' }) => theme.colors[$themeColor]}; color: white; box-shadow: 0 4px 10px ${({ theme, $themeColor = 'learn' }) => `${theme.colors[$themeColor]}4D`};
-    &:hover { transform: scale(1.05); box-shadow: 0 6px 15px ${({ theme, $themeColor = 'learn' }) => `${theme.colors[$themeColor]}66`}; }
-`;
-const StartButton = styled(CompleteButton)`
-    font-size: 1.1rem; padding: 0.9rem 2.5rem; margin: 1rem auto 0; display: block;
-    background-color: ${({ theme, disabled, $themeColor = 'primary' }) => disabled ? theme.colors.label : theme.colors[$themeColor]};
-    &:not(:disabled):hover { transform: scale(1.05); }
-    &:disabled { cursor: not-allowed; box-shadow: none; opacity: 0.7; }
-`;
+// Results Styles
 const ResultsContainer = styled.div`
-    text-align: center; padding: 4rem 2rem; background-color: ${({ theme }) => theme.colors.cardBg}; border-radius: 24px; border: 1px solid ${({ theme }) => theme.colors.border};
-    box-shadow: ${({ theme }) => theme.shadows.main}; width: 100%; max-width: 600px; margin: 0 auto; animation: ${popIn} 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    h2 { font-size: 2rem; color: ${({ theme }) => theme.colors.header}; margin: 0 0 0.5rem 0; }
-    p { font-size: 1.1rem; color: ${({ theme }) => theme.colors.label}; max-width: 40ch; margin: 0 auto 1.5rem auto; }
+    text-align: center; padding: 4rem 2rem; background-color: ${({ theme }) => theme.colors.cardBg}; border-radius: 24px; box-shadow: ${({ theme }) => theme.shadows.main};
+    animation: ${popIn} 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    h2 { font-size: 2.5rem; color: ${({ theme }) => theme.colors.learn}; margin: 0 0 0.5rem 0; }
+    p { font-size: 1.1rem; color: ${({ theme }) => theme.colors.label}; margin: 0 0 2rem 0; }
 `;
 const ResultsActions = styled.div`display: flex; justify-content: center; gap: 1rem;`;
 const GameButton = styled.button<{ $secondary?: boolean }>`
-    font-family: inherit; font-size: 1rem; font-weight: 600; padding: 0.8rem 2rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; border: none;
-    background-color: ${({ theme, $secondary }) => $secondary ? theme.colors.boxBg : theme.colors.learn};
-    color: ${({ theme, $secondary }) => $secondary ? theme.colors.header : 'white'};
+    font-family: inherit; font-size: 1rem; font-weight: 600; padding: 0.8rem 2rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease;
+    border: ${({ $secondary, theme }) => $secondary ? `2px solid ${theme.colors.border}` : 'none'};
+    background-color: ${({ $secondary, theme }) => $secondary ? 'transparent' : theme.colors.learn};
+    color: ${({ $secondary, theme }) => $secondary ? theme.colors.header : 'white'};
     &:hover { transform: scale(1.05); }
 `;
 
