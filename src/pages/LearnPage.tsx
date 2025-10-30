@@ -60,8 +60,8 @@ const speak = (text: string) => {
 
 
 // --- TYPE DEFINITIONS ---
-type Step = 'selection' | 'learning' | 'practice-eng-to-chi' | 'practice-chi-to-eng' | 'practice-listen-to-chi' | 'results';
-type PracticeMode = 'eng-to-chi' | 'chi-to-eng' | 'listen-to-chi';
+type Step = 'selection' | 'learning' | 'practice-eng-to-chi' | 'practice-chi-to-eng' | 'practice-listen-to-chi' | 'practice-fill-in-the-blank' | 'results';
+type PracticeMode = 'eng-to-chi' | 'chi-to-eng' | 'listen-to-chi' | 'fill-in-the-blank';
 interface PracticeQuestion {
     prompt: string;
     correctAnswer: string;
@@ -99,6 +99,16 @@ const createPracticeQuestions = (words: Word[], mode: PracticeMode): PracticeQue
             const incorrectOptions = finalDistractors.map(w => w.word);
             return {
                 prompt: correctWord.definition,
+                correctAnswer: correctWord.word,
+                options: shuffleArray([correctWord.word, ...incorrectOptions]),
+                word: correctWord
+            };
+        } else if (mode === 'fill-in-the-blank') {
+            const incorrectOptions = finalDistractors.map(w => w.word);
+            const promptSentence = correctWord.example.replace(new RegExp(`\\b${correctWord.word}\\b`, 'i'), '_______');
+
+            return {
+                prompt: promptSentence,
                 correctAnswer: correctWord.word,
                 options: shuffleArray([correctWord.word, ...incorrectOptions]),
                 word: correctWord
@@ -238,17 +248,19 @@ const PracticeGame: React.FC<{ words: Word[], mode: PracticeMode, onComplete: ()
                 <ProgressBar style={{ width: `${(masteredWords.size / totalQuestions) * 100}%` }} />
             </ProgressBarContainer>
 
-            {mode === 'chi-to-eng' ? (
-                <PromptContainer><PracticePromptText>{currentQuestion.prompt}</PracticePromptText></PromptContainer>
-            ) : mode === 'listen-to-chi' ? (
+            {mode === 'listen-to-chi' ? (
                 <ListenPromptContainer>
                     <ListenButton onClick={() => speak(currentQuestion.word.word)} aria-label="Play sound"><BigSpeakerIcon /></ListenButton>
                 </ListenPromptContainer>
-            ) : ( // eng-to-chi
-                <PromptContainer><PracticePromptText>{currentQuestion.prompt}</PracticePromptText></PromptContainer>
+            ) : (
+                <PromptContainer>
+                    <PracticePromptText $isSentence={mode === 'fill-in-the-blank'}>
+                        {currentQuestion.prompt}
+                    </PracticePromptText>
+                </PromptContainer>
             )}
 
-            <OptionsGrid $isChinese={mode !== 'chi-to-eng'}>
+            <OptionsGrid $isChinese={mode === 'eng-to-chi' || mode === 'listen-to-chi'}>
                 {currentQuestion.options.map(option => (
                     <OptionButton key={option} onClick={() => handleOptionClick(option)} disabled={!!selectedOption} $state={getButtonState(option)}>
                         {option}
@@ -302,7 +314,8 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
 
     const handleBack = () => {
         switch (step) {
-            case 'results': setStep('practice-listen-to-chi'); break;
+            case 'results': setStep('practice-fill-in-the-blank'); break;
+            case 'practice-fill-in-the-blank': setStep('practice-listen-to-chi'); break;
             case 'practice-listen-to-chi': setStep('practice-chi-to-eng'); break;
             case 'practice-chi-to-eng': setStep('practice-eng-to-chi'); break;
             case 'practice-eng-to-chi': setStep('learning'); break;
@@ -317,6 +330,7 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
             case 'practice-eng-to-chi': return '练习：看英文选中文';
             case 'practice-chi-to-eng': return '练习：看中文选英文';
             case 'practice-listen-to-chi': return '练习：听音辨词';
+            case 'practice-fill-in-the-blank': return '单元练习：选词填空';
             case 'results': return '练习完成!';
             case 'learning': default: return topic.title;
         }
@@ -346,9 +360,14 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
                                 </WordItem>
                             ))}
                         </WordListContainer>
-                        <StartButton onClick={() => setStep('learning')} disabled={selectedWords.length === 0} title={selectedWords.length === 0 ? "请至少选择一个单词" : ""} $themeColor="learn">
-                            开始学习 ({selectedWords.length})
-                        </StartButton>
+                        <ActionsContainer>
+                            <StartButton onClick={() => setStep('learning')} disabled={selectedWords.length === 0} title={selectedWords.length === 0 ? "请至少选择一个单词" : ""} $themeColor="learn">
+                                开始学习 ({selectedWords.length})
+                            </StartButton>
+                             <StartButton onClick={() => setStep('practice-fill-in-the-blank')} disabled={selectedWords.length === 0} title={selectedWords.length === 0 ? "请至少选择一个单词" : ""} $themeColor="practice" $secondary>
+                                综合练习 ({selectedWords.length})
+                            </StartButton>
+                        </ActionsContainer>
                     </SelectionContainer>
                 );
             case 'learning':
@@ -358,7 +377,9 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
             case 'practice-chi-to-eng':
                 return <PracticeGame words={selectedWords} mode="chi-to-eng" onComplete={() => setStep('practice-listen-to-chi')} />;
             case 'practice-listen-to-chi':
-                return <PracticeGame words={selectedWords} mode="listen-to-chi" onComplete={() => setStep('results')} />;
+                return <PracticeGame words={selectedWords} mode="listen-to-chi" onComplete={() => setStep('practice-fill-in-the-blank')} />;
+            case 'practice-fill-in-the-blank':
+                return <PracticeGame words={selectedWords} mode="fill-in-the-blank" onComplete={() => setStep('results')} />;
             case 'results':
                  return (
                     <ResultsContainer>
@@ -442,10 +463,20 @@ const NavButton = styled.button`
     &:disabled { opacity: 0.5; cursor: not-allowed; }
 `;
 const ProgressText = styled.span`font-weight: 500; color: ${({ theme }) => theme.colors.label};`;
-const CompleteButton = styled.button<{ $themeColor: string }>`
-    font-family: inherit; font-size: 1rem; font-weight: 600; padding: 0.8rem 2rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease; border: none;
-    background-color: ${({ theme, $themeColor }) => theme.colors[$themeColor]}; color: white; box-shadow: 0 4px 10px ${({ theme, $themeColor }) => `${theme.colors[$themeColor]}50`};
-    &:hover { transform: scale(1.05); }
+const CompleteButton = styled.button<{ $themeColor: string, $secondary?: boolean }>`
+    font-family: inherit; font-size: 1rem; font-weight: 600; padding: 0.8rem 2rem; border-radius: 9999px; cursor: pointer; transition: all 0.2s ease;
+    border: 2px solid ${({ theme, $themeColor, $secondary }) => $secondary ? (theme.colors[$themeColor] || theme.colors.primary) : 'transparent'};
+    background-color: ${({ theme, $themeColor, $secondary }) => $secondary ? 'transparent' : (theme.colors[$themeColor] || theme.colors.primary)};
+    color: ${({ theme, $themeColor, $secondary }) => $secondary ? (theme.colors[$themeColor] || theme.colors.primary) : 'white'};
+    box-shadow: ${({ theme, $themeColor, $secondary }) => $secondary ? 'none' : `0 4px 10px ${theme.colors[$themeColor] || theme.colors.primary}50`};
+    
+    &:hover:not(:disabled) { 
+        transform: scale(1.05); 
+        ${({ $secondary, theme, $themeColor }) => $secondary 
+            ? css`background-color: ${theme.colors[$themeColor]}1A;` 
+            : css`box-shadow: 0 6px 15px ${theme.colors[$themeColor]}60;`
+        }
+    }
 `;
 
 // Selection Step Styles
@@ -487,13 +518,21 @@ const WordItem = styled.div`
     span { color: ${({ theme }) => theme.colors.label}; }
 `;
 
+const ActionsContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+`;
+
 const StartButton = styled(CompleteButton)`
-    display: block; margin: 0 auto;
     &:disabled {
-        background-color: #bdc3c7;
-        cursor: not-allowed;
+        background-color: ${({ $secondary }) => $secondary ? 'transparent' : '#bdc3c7'};
+        color: #bdc3c7;
+        border-color: #bdc3c7;
         box-shadow: none;
         transform: none;
+        cursor: not-allowed;
     }
 `;
 
@@ -509,7 +548,14 @@ const ProgressBarContainer = styled.div`position: absolute; top: 0; left: 0; wid
 const ProgressBar = styled.div`height: 100%; background-color: ${({ theme }) => theme.colors.learn}; transition: width 0.3s ease;`;
 const PromptContainer = styled.div`width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;`;
 const ListenPromptContainer = styled(PromptContainer)``;
-const PracticePromptText = styled.h2`font-size: 2.5rem; color: ${({ theme }) => theme.colors.header}; font-weight: 700; text-align: center;`;
+const PracticePromptText = styled.h2<{ $isSentence?: boolean }>`
+    font-size: ${({ $isSentence }) => $isSentence ? '1.75rem' : '2.5rem'};
+    color: ${({ theme }) => theme.colors.header};
+    font-weight: 700;
+    text-align: center;
+    line-height: ${({ $isSentence }) => $isSentence ? '1.5' : '1.2'};
+    padding: 0 1rem;
+`;
 
 const ListenButton = styled.button`
     background-color: ${({ theme }) => theme.colors.learnLight}; border: none; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;

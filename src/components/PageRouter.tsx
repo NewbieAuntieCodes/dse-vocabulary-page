@@ -2,6 +2,7 @@ import React from 'react';
 import HomePage from '../pages/HomePage';
 import LearnPage from '../pages/LearnPage';
 import MyWordsPage from '../pages/MyWordsPage';
+import PracticePage from '../pages/PracticePage';
 import { Page } from '../types';
 
 interface PageRouterProps {
@@ -29,6 +30,8 @@ const PageRouter: React.FC<PageRouterProps> = ({
                         topicId={activeTopicId!} 
                         navigateTo={navigateTo} 
                     />;
+        case 'practice':
+            return <PracticePage navigateTo={navigateTo} />;
         case 'my-words':
             return <MyWordsPage 
                         navigateTo={navigateTo} 
@@ -38,7 +41,7 @@ const PageRouter: React.FC<PageRouterProps> = ({
                     />;
         case 'home':
         default:
-            return <HomePage navigateToActivity={navigateToActivity} />;
+            return <HomePage navigateTo={navigateTo} navigateToActivity={navigateToActivity} />;
     }
 };
 

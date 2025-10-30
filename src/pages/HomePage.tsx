@@ -1,6 +1,7 @@
 import React from 'react';
 import { styled } from 'styled-components';
 import { wordLists } from '../vocabulary';
+import { practiceWordList } from '../data/practice';
 import { Page, WordList as WordListType } from '../types';
 
 const HeroIllustration = () => (
@@ -22,17 +23,18 @@ const HeroIllustration = () => (
 );
 
 interface HomePageProps {
+    navigateTo: (page: Page) => void;
     navigateToActivity: (topicId: string, page: Page) => void;
 }
 
-const HomePage: React.FC<HomePageProps> = ({ navigateToActivity }) => {
+const HomePage: React.FC<HomePageProps> = ({ navigateTo, navigateToActivity }) => {
     const dseLists = wordLists.filter(list => list.category === 'dse');
     const skillsLists = wordLists.filter(list => list.category === 'skills');
 
-    const renderTopicGrid = (lists: WordListType[]) => (
+    const renderTopicGrid = (lists: WordListType[], page: Page) => (
         <TopicsGrid>
             {lists.map(list => (
-                <TopicCard key={list.id} onClick={() => navigateToActivity(list.id, 'learn')} $theme={list.theme}>
+                <TopicCard key={list.id} onClick={() => navigateToActivity(list.id, page)} $theme={list.theme}>
                     <IllustrationContainer>
                         {list.illustration && <list.illustration />}
                     </IllustrationContainer>
@@ -57,12 +59,27 @@ const HomePage: React.FC<HomePageProps> = ({ navigateToActivity }) => {
                 </HeroIllustrationWrapper>
             </HeroSection>
             
-            {renderTopicGrid(dseLists)}
+            {renderTopicGrid(dseLists, 'learn')}
+
+            <SkillsSection>
+                <SectionHeader>综合练习</SectionHeader>
+                 <TopicsGrid>
+                    <TopicCard key={practiceWordList.id} onClick={() => navigateTo('practice')} $theme={'practice'}>
+                        <IllustrationContainer>
+                            {practiceWordList.illustration && <practiceWordList.illustration />}
+                        </IllustrationContainer>
+                        <CardContent>
+                            <h2>{practiceWordList.title}</h2>
+                            <p>{practiceWordList.description}</p>
+                        </CardContent>
+                    </TopicCard>
+                </TopicsGrid>
+            </SkillsSection>
 
             {skillsLists.length > 0 && (
                 <SkillsSection>
                     <SectionHeader>Essential Skills</SectionHeader>
-                    {renderTopicGrid(skillsLists)}
+                    {renderTopicGrid(skillsLists, 'learn')}
                 </SkillsSection>
             )}
 
@@ -172,17 +189,22 @@ const CardContent = styled.div`
     text-align: left;
 `;
 
-const TopicCard = styled.div<{ $theme: 'learn' | 'skills' }>`
+const TopicCard = styled.div<{ $theme: 'learn' | 'skills' | 'practice' }>`
     background-color: ${({ theme, $theme }) => ({
         'learn': theme.colors.learnLight,
-        'skills': theme.colors.skillsLight
+        'skills': theme.colors.skillsLight,
+        'practice': theme.colors.practiceLight
     })[$theme] || theme.colors.cardBg};
     border-radius: 24px;
     padding: 1.5rem;
     box-shadow: ${({ theme }) => theme.shadows.subtle};
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: 1px solid ${({ theme, $theme }) => `${theme.colors[$theme]}40`};
+    border: 1px solid ${({ theme, $theme }) => ({
+        'learn': `${theme.colors.learn}40`,
+        'skills': `${theme.colors.skills}40`,
+        'practice': `${theme.colors.practice}40`
+    })[$theme] || theme.colors.border};
     display: flex;
     flex-direction: column;
 
