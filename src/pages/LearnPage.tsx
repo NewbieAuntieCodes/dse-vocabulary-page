@@ -62,6 +62,7 @@ const speak = (text: string) => {
 // --- TYPE DEFINITIONS ---
 type Step = 'selection' | 'learning' | 'practice-eng-to-chi' | 'practice-chi-to-eng' | 'practice-listen-to-chi' | 'practice-fill-in-the-blank' | 'results';
 type PracticeMode = 'eng-to-chi' | 'chi-to-eng' | 'listen-to-chi' | 'fill-in-the-blank';
+const practiceModes: PracticeMode[] = ['eng-to-chi', 'chi-to-eng', 'listen-to-chi', 'fill-in-the-blank'];
 interface PracticeQuestion {
     prompt: string;
     correctAnswer: string;
@@ -271,6 +272,27 @@ const PracticeGame: React.FC<{ words: Word[], mode: PracticeMode, onComplete: ()
     );
 };
 
+// --- Stepper Component ---
+const PracticeStepper: React.FC<{
+    steps: PracticeMode[];
+    currentStep: PracticeMode;
+    onStepClick: (step: PracticeMode) => void;
+}> = ({ steps, currentStep, onStepClick }) => {
+    return (
+        <StepperContainer>
+            {steps.map((step) => (
+                <StepDot
+                    key={step}
+                    $isActive={step === currentStep}
+                    onClick={() => onStepClick(step)}
+                    aria-label={`跳转到练习: ${step.replace(/-/g, ' ')}`}
+                />
+            ))}
+        </StepperContainer>
+    );
+};
+
+
 // --- Main Page Component ---
 const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }> = ({ topicId, navigateTo }) => {
     const topic = wordLists.find(list => list.id === topicId);
@@ -311,18 +333,6 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
     };
     
     const topicForLearning = { ...topic, words: selectedWords };
-
-    const handleBack = () => {
-        switch (step) {
-            case 'results': setStep('practice-fill-in-the-blank'); break;
-            case 'practice-fill-in-the-blank': setStep('practice-listen-to-chi'); break;
-            case 'practice-listen-to-chi': setStep('practice-chi-to-eng'); break;
-            case 'practice-chi-to-eng': setStep('practice-eng-to-chi'); break;
-            case 'practice-eng-to-chi': setStep('learning'); break;
-            case 'learning': setStep('selection'); break;
-            case 'selection': navigateTo('home'); break;
-        }
-    };
 
     const getTitle = () => {
         switch (step) {
@@ -372,14 +382,36 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
                 );
             case 'learning':
                 return <LearnStep topic={topicForLearning} onComplete={() => setStep('practice-eng-to-chi')} />;
+            
             case 'practice-eng-to-chi':
-                return <PracticeGame words={selectedWords} mode="eng-to-chi" onComplete={() => setStep('practice-chi-to-eng')} />;
             case 'practice-chi-to-eng':
-                return <PracticeGame words={selectedWords} mode="chi-to-eng" onComplete={() => setStep('practice-listen-to-chi')} />;
             case 'practice-listen-to-chi':
-                return <PracticeGame words={selectedWords} mode="listen-to-chi" onComplete={() => setStep('practice-fill-in-the-blank')} />;
-            case 'practice-fill-in-the-blank':
-                return <PracticeGame words={selectedWords} mode="fill-in-the-blank" onComplete={() => setStep('results')} />;
+            case 'practice-fill-in-the-blank': {
+                const currentMode = step.replace('practice-', '') as PracticeMode;
+                const handlePracticeComplete = () => {
+                    const currentIndex = practiceModes.indexOf(currentMode);
+                    if (currentIndex < practiceModes.length - 1) {
+                        setStep(`practice-${practiceModes[currentIndex + 1]}`);
+                    } else {
+                        setStep('results');
+                    }
+                };
+                
+                return (
+                    <StepContainer>
+                        <PracticeGame
+                            words={selectedWords}
+                            mode={currentMode}
+                            onComplete={handlePracticeComplete}
+                        />
+                        <PracticeStepper
+                            steps={practiceModes}
+                            currentStep={currentMode}
+                            onStepClick={(mode) => setStep(`practice-${mode}`)}
+                        />
+                    </StepContainer>
+                );
+            }
             case 'results':
                  return (
                     <ResultsContainer>
@@ -398,7 +430,7 @@ const LearnPage: React.FC<{ topicId: string, navigateTo: (page: Page) => void }>
     return (
         <PageContainer>
             <PageHeader>
-                <BackButton onClick={handleBack} aria-label="返回上一步"><BackArrowIcon /></BackButton>
+                <BackButton onClick={() => navigateTo('home')} aria-label="返回主页"><BackArrowIcon /></BackButton>
                 <h1>{getTitle()}</h1>
             </PageHeader>
             <main>{renderContent()}</main>
@@ -580,6 +612,30 @@ const OptionButton = styled.button<{ $state: 'default' | 'correct' | 'incorrect'
             default: return '';
         }
     }}
+`;
+
+const StepperContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 2rem;
+`;
+
+const StepDot = styled.button<{ $isActive: boolean }>`
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: ${({ theme, $isActive }) => $isActive ? theme.colors.learn : theme.colors.border};
+    transform: ${({ $isActive }) => $isActive ? 'scale(1.2)' : 'scale(1)'};
+
+    &:hover {
+        background-color: ${({ theme }) => theme.colors.learn};
+        opacity: 0.7;
+    }
 `;
 
 // Results Styles

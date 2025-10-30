@@ -1,6 +1,6 @@
 // This file was previously a placeholder. Content has been added to resolve module import errors.
-// FIX: Replaced the side-effect import with a type-only import to correctly establish a dependency for module augmentation.
-import type {} from 'styled-components';
+// FIX: Replaced the type-only import with a side-effect import to fix the module augmentation error.
+import 'styled-components';
 import { createGlobalStyle } from 'styled-components';
 
 export const theme = {
